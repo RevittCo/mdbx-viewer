@@ -1,0 +1,9 @@
+services:
+  api:
+    build: api
+    env_file:
+      - .env
+    ports:
+      - "8080:8080"
+    volumes:
+      - "${DATA_DIR}:/data"
