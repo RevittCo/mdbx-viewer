@@ -7,10 +7,16 @@ import (
 
 func init() {
 	viper.SetDefault("httpport", 80)
+	viper.SetDefault("data.dir", "/Users/user/Data")
 }
 
 type Config struct {
 	HttpPort int
+	Data     Data
+}
+
+type Data struct {
+	Dir string
 }
 
 func InitializeConfig() (*Config, error) {

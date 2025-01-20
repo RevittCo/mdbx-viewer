@@ -3,14 +3,15 @@ module github.com/RevittConsulting/mdbx-viewer
 go 1.23.2
 
 require (
+	github.com/erigontech/mdbx-go v0.27.24
 	github.com/go-chi/chi/v5 v5.2.0
 	github.com/go-chi/cors v1.2.1
 	github.com/spf13/viper v1.19.0
 )
 
 require (
-	github.com/erigontech/mdbx-go v0.38.5 // indirect
 	github.com/fsnotify/fsnotify v1.7.0 // indirect
+	github.com/gorilla/websocket v1.5.3 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/magiconair/properties v1.8.7 // indirect
 	github.com/mitchellh/mapstructure v1.5.0 // indirect

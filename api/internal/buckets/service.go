@@ -1,10 +1,14 @@
 package buckets
 
 import (
+	"errors"
 	"fmt"
 	"github.com/RevittConsulting/mdbx-viewer/internal/db_mdbx"
 	"github.com/RevittConsulting/mdbx-viewer/types"
+	"golang.org/x/sys/unix"
+	"log"
 	"os"
+	"path/filepath"
 	"sync"
 )
 
@@ -41,6 +45,72 @@ func NewService(db Db) *Service {
 	}
 }
 
+func (s *Service) GetDataSource() (*DataSource, error) {
+	dir := os.Getenv("DATA_DIR")
+	entries, err := os.ReadDir(dir)
+	if err != nil {
+		return nil, err
+	}
+
+	dataSource := &DataSource{Source: dir}
+	for _, entry := range entries {
+		treeElement, err := buildTreeElement(dir, entry)
+		if err != nil {
+			log.Println(err)
+			return nil, err
+		}
+		dataSource.TreeElements = append(dataSource.TreeElements, treeElement)
+	}
+
+	return dataSource, nil
+}
+
+func buildTreeElement(parentPath string, entry os.DirEntry) (TreeElement, error) {
+	fullPath := filepath.Join(parentPath, entry.Name())
+	treeElement := TreeElement{
+		Name:         entry.Name(),
+		FullPath:     fullPath,
+		IsSelectable: true,
+	}
+
+	if entry.IsDir() {
+		children, err := aggregateFolder(fullPath)
+		if children == nil {
+			return treeElement, nil
+		}
+		if err != nil {
+			return TreeElement{}, err
+		}
+		treeElement.Children = children
+	}
+
+	return treeElement, nil
+}
+
+func aggregateFolder(path string) ([]TreeElement, error) {
+	entries, err := os.ReadDir(path)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return nil, nil
+		}
+		if errors.Is(err, unix.EPERM) {
+			return nil, nil
+		}
+		return nil, err
+	}
+
+	var children []TreeElement
+	for _, entry := range entries {
+		child, err := buildTreeElement(path, entry)
+		if err != nil {
+			return nil, err
+		}
+		children = append(children, child)
+	}
+
+	return children, nil
+}
+
 func (s *Service) Open(path string) ([]string, error) {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
@@ -49,12 +119,13 @@ func (s *Service) Open(path string) ([]string, error) {
 		return nil, fmt.Errorf("database file does not exist at path: %s", path)
 	}
 
+	s.db.Close()
+
 	newEnv := db_mdbx.New()
 	if err := newEnv.Open(path); err != nil {
 		return nil, err
 	}
 
-	s.db.Close()
 	s.db = newEnv
 
 	return s.db.List()

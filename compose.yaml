@@ -5,5 +5,14 @@ services:
       - .env
     ports:
       - "8080:8080"
+    environment:
+      - HTTPPORT=8080
     volumes:
-      - "${DATA_DIR}:/data"
+      - ${DATA_DIR}:/${DATA_DIR}
+
+  web:
+    build: web
+    ports:
+      - "3000:3000"
+    depends_on:
+      - api

@@ -3,10 +3,11 @@ package db_mdbx
 import (
 	"encoding/hex"
 	"errors"
+	"log"
+
 	"github.com/RevittConsulting/mdbx-viewer/pkg/utils"
 	"github.com/RevittConsulting/mdbx-viewer/types"
 	"github.com/erigontech/mdbx-go/mdbx"
-	"log"
 )
 
 type MDBX struct {
@@ -19,7 +20,7 @@ func New() *MDBX {
 		log.Fatal(err)
 	}
 
-	err = env.SetOption(mdbx.OptMaxDB, 200)
+	err = env.SetOption(mdbx.OptMaxDB, 400)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -31,7 +32,7 @@ func New() *MDBX {
 
 // Open - Open the environment.
 func (m *MDBX) Open(path string) error {
-	return m.env.Open(path, mdbx.NoTLS|mdbx.Readonly, 0444)
+	return m.env.Open(path, mdbx.NoTLS|mdbx.EnvDefaults, 0444)
 }
 
 // Close - Close the environment.

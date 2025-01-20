@@ -2,6 +2,7 @@ package types
 
 import (
 	"fmt"
+
 	"github.com/RevittConsulting/mdbx-viewer/pkg/utils"
 )
 
@@ -18,7 +19,7 @@ type KeyValuePairString struct {
 }
 
 func (v Value) Hex() string {
-	return fmt.Sprintf("%x", v)
+	return fmt.Sprintf("0x%x", v)
 }
 
 func (v Value) Uint64() uint64 {
